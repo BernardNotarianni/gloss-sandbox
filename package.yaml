@@ -35,6 +35,7 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - gloss-sandbox
+    - gloss
 
 tests:
   gloss-sandbox-test:
