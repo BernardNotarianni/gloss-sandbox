@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+
+while true; do
+
+    stack build
+
+    if [ $? -eq 0 ]; then
+        stack exec gloss-sandbox-exe
+    fi
+
+    # scan directories src/ and tests/
+    inotifywait -qqr -e modify -e create -e move -e delete app src test --exclude "\.\#.*"
+done

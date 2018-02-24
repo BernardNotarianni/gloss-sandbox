@@ -2,20 +2,44 @@ module Main where
 
 import Graphics.Gloss
 
-window :: Display
-window = InWindow "Gloss" (400, 400) (10, 10)
-
 background :: Color
 background = white
 
-drawing :: Picture
-drawing = pictures
-  [ translate (-20) (-100) $ color ballColor   $ circleSolid 30
-  , translate ( 30) (  50) $ color paddleColor $ rectangleSolid 10 50
-  ]
-  where
-    ballColor = dark red
-    paddleColor = light (light blue)
+window :: Display
+window = InWindow "Gloss" (400, 400) (10, 10)
 
 main :: IO ()
-main = display window background drawing
+main = animate window background frame
+  where
+    frame :: Float -> Picture
+    frame seconds = render $ moveBall seconds initialState
+
+
+data State = State { position :: (Float, Float)
+                   , velocity :: (Float, Float)
+                   }
+
+initialState :: State
+initialState = State { position = (-10, 30)
+                     , velocity = (100, 100)
+                     }
+
+moveBall :: Float -> State -> State
+moveBall seconds game = game { position = (x', y') }
+  where
+    (x, y) = position game
+    (vx, vy) = velocity game
+
+    x' = x + vx * seconds
+    y' = y + vy * seconds
+
+render :: State -> Picture
+render state =
+  translate x y $ color ballColor $ circleSolid 10
+  where
+    (x,y) = position state
+    ballColor = dark red
+
+
+
+
