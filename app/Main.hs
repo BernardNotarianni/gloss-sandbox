@@ -1,7 +1,8 @@
 module Main where
 
 import Graphics.Gloss
-import Graphics.Gloss.Data.ViewPort
+import Graphics.Gloss.Interface.Pure.Game
+
 
 background :: Color
 background = white
@@ -21,20 +22,11 @@ initialState = State { position = (-10, 30)
 window :: Display
 window = InWindow "Gloss" (400, 400) (10, 10)
 
-
-
 main :: IO ()
-main = simulate window background fps initialState render update
+main = play window background fps initialState render handleKeys update
 
--- | Update the game by moving the ball.
--- Ignore the ViewPort argument.
-update :: ViewPort -> Float -> State -> State
-update _ = moveBall
-
-
-
-moveBall :: Float -> State -> State
-moveBall seconds game = game { position = (x', y') }
+update ::  Float -> State -> State
+update seconds game = game { position = (x', y') }
   where
     (x, y) = position game
     (vx, vy) = velocity game
@@ -48,3 +40,12 @@ render state =
   where
     (x,y) = position state
     ballColor = dark red
+
+handleKeys :: Event -> State -> State
+handleKeys (EventKey (Char 's') _ _ _) game =
+  game { position = (0, 0) }
+handleKeys (EventKey (Char 'q') _ _ _) game =
+  game { velocity = (-100,100) }
+handleKeys (EventKey (Char 'd') _ _ _) game =
+  game { velocity = ( 100, 100) }
+handleKeys _ game = game
