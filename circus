@@ -6,9 +6,11 @@ while true; do
     stack build
 
     if [ $? -eq 0 ]; then
+        echo "Executing the game..."
         stack exec gloss-sandbox-exe
     fi
 
+    echo "Waiting for some source file modification..."
     # scan directories src/ and tests/
     inotifywait -qqr -e modify -e create -e move -e delete app src test --exclude "\.\#.*"
 done
