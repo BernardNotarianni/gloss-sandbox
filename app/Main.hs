@@ -16,7 +16,7 @@ data State = State { position :: (Float, Float)
 
 initialState :: State
 initialState = State { position = (-10, 30)
-                     , velocity = (100, 100)
+                     , velocity = (speed, speed)
                      }
 
 window :: Display
@@ -42,10 +42,12 @@ render state =
     ballColor = dark red
 
 handleKeys :: Event -> State -> State
-handleKeys (EventKey (Char 's') _ _ _) game =
-  game { position = (0, 0) }
-handleKeys (EventKey (Char 'q') _ _ _) game =
-  game { velocity = (-100,100) }
-handleKeys (EventKey (Char 'd') _ _ _) game =
-  game { velocity = ( 100, 100) }
+handleKeys (EventKey (Char 's') _ _ _) game = game { position = (0, 0) }
+handleKeys (EventKey (SpecialKey KeyLeft)  _ _ _) game = game { velocity = (-speed, 0) }
+handleKeys (EventKey (SpecialKey KeyRight) _ _ _) game = game { velocity = ( speed, 0) }
+handleKeys (EventKey (SpecialKey KeyUp)    _ _ _) game = game { velocity = (0, speed) }
+handleKeys (EventKey (SpecialKey KeyDown)  _ _ _) game = game { velocity = (0,-speed) }
 handleKeys _ game = game
+
+speed :: Float
+speed = 100
