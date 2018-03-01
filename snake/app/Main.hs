@@ -13,12 +13,17 @@ fps = 3
 squareSize :: Int
 squareSize = 20
 
-data State = State { position :: (Int, Int)
+
+type Position = (Int, Int)
+
+type Snake = [ Position ]
+
+data State = State { snake :: Snake
                    , direction :: (Int, Int)
                    }
 
 initialState :: State
-initialState = State { position = (0, 0)
+initialState = State { snake = [(0, 0)]
                      , direction = (1, 0)
                      }
 
@@ -30,9 +35,10 @@ main :: IO ()
 main = play window background fps initialState render handleKeys update
 
 update ::  Float -> State -> State
-update _seconds game = game { position = (x', y') }
+update _seconds game = game { snake = (x', y') : current }
   where
-    (x, y) = position game
+    current = snake game
+    (x, y) = head current
     (dx, dy) = direction game
 
     x' = x + dx
@@ -40,15 +46,19 @@ update _seconds game = game { position = (x', y') }
 
 render :: State -> Picture
 render state =
+  Pictures (map renderCell (snake state))
+
+
+renderCell :: Position -> Picture
+renderCell (cell_x, cell_y) =
   translate x y $ color headColor $ rectangleSolid 20 20
   where
-    (cell_x, cell_y) = position state
     x = fromIntegral $ cell_x * squareSize
     y = fromIntegral $ cell_y * squareSize
     headColor = dark red
 
 handleKeys :: Event -> State -> State
-handleKeys (EventKey (Char 's') _ _ _) game = game { position = (0, 0) }
+handleKeys (EventKey (Char 's') _ _ _) _ = initialState
 handleKeys (EventKey (SpecialKey KeyLeft)  _ _ _) game = game { direction = (-1, 0) }
 handleKeys (EventKey (SpecialKey KeyRight) _ _ _) game = game { direction = ( 1, 0) }
 handleKeys (EventKey (SpecialKey KeyUp)    _ _ _) game = game { direction = ( 0, 1) }
