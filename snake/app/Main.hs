@@ -15,16 +15,25 @@ squareSize = 20
 
 
 type Position = (Int, Int)
+type Direction = (Int, Int)
 
 type Snake = [ Position ]
 
+data Game = Running | GameOver
+  deriving (Eq, Show)
+
 data State = State { snake :: Snake
-                   , direction :: (Int, Int)
+                   , direction :: Direction
+                   , growth :: Int
+                   , game :: Game
                    }
+
 
 initialState :: State
 initialState = State { snake = [(0, 0)]
                      , direction = (1, 0)
+                     , growth = 5
+                     , game = Running
                      }
 
 window :: Display
@@ -35,14 +44,30 @@ main :: IO ()
 main = play window background fps initialState render handleKeys update
 
 update ::  Float -> State -> State
-update _seconds game = game { snake = (x', y') : current }
+update _seconds state
+  | game state == GameOver = state
+  | hitBody new s = state { game = GameOver }
+  | g > 0 = state { snake = new : s, growth = g - 1 }
+  | otherwise = state { snake = new :  (cutTail s) }
   where
-    current = snake game
-    (x, y) = head current
-    (dx, dy) = direction game
+    s = snake state
+    g = growth state
+    d = direction state
+    cutTail = reverse . tail . reverse
+    new = newHead s d
+
+newHead :: Snake -> Direction -> Position
+newHead s d = (x', y')
+  where
+    (x, y) = head s
+    (dx, dy) = d
 
     x' = x + dx
     y' = y + dy
+
+hitBody :: Position -> Snake -> Bool
+hitBody position s =
+  position `elem` s
 
 render :: State -> Picture
 render state =
@@ -59,9 +84,9 @@ renderCell (cell_x, cell_y) =
 
 handleKeys :: Event -> State -> State
 handleKeys (EventKey (Char 's') _ _ _) _ = initialState
-handleKeys (EventKey (SpecialKey KeyLeft)  _ _ _) game = game { direction = (-1, 0) }
-handleKeys (EventKey (SpecialKey KeyRight) _ _ _) game = game { direction = ( 1, 0) }
-handleKeys (EventKey (SpecialKey KeyUp)    _ _ _) game = game { direction = ( 0, 1) }
-handleKeys (EventKey (SpecialKey KeyDown)  _ _ _) game = game { direction = ( 0,-1) }
-handleKeys _ game = game
+handleKeys (EventKey (SpecialKey KeyLeft)  _ _ _) state = state { direction = (-1, 0) }
+handleKeys (EventKey (SpecialKey KeyRight) _ _ _) state = state { direction = ( 1, 0) }
+handleKeys (EventKey (SpecialKey KeyUp)    _ _ _) state = state { direction = ( 0, 1) }
+handleKeys (EventKey (SpecialKey KeyDown)  _ _ _) state = state { direction = ( 0,-1) }
+handleKeys _ state = state
 
