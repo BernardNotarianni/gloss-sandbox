@@ -25,6 +25,7 @@ data Game = Running | GameOver
 data State = State { snake :: Snake
                    , direction :: Direction
                    , growth :: Int
+                   , food :: Position
                    , game :: Game
                    }
 
@@ -33,6 +34,7 @@ initialState :: State
 initialState = State { snake = [(0, 0)]
                      , direction = (1, 0)
                      , growth = 5
+                     , food = (2, 3)
                      , game = Running
                      }
 
@@ -71,16 +73,29 @@ hitBody position s =
 
 render :: State -> Picture
 render state =
-  Pictures (map renderCell (snake state))
+  Pictures [ renderSnake $ snake state
+           , renderFood $ food state
+           ]
 
 
-renderCell :: Position -> Picture
-renderCell (cell_x, cell_y) =
-  translate x y $ color headColor $ rectangleSolid 20 20
+renderSnake :: Snake -> Picture
+renderSnake s =
+  Pictures (map (renderCell headColor) s)
+  where
+    headColor = dark red
+
+renderFood :: Position -> Picture
+renderFood p =
+  renderCell foodColor p
+  where
+    foodColor = dark blue
+
+renderCell :: Color -> Position -> Picture
+renderCell c (cell_x, cell_y) =
+  translate x y $ color c $ rectangleSolid 20 20
   where
     x = fromIntegral $ cell_x * squareSize
     y = fromIntegral $ cell_y * squareSize
-    headColor = dark red
 
 handleKeys :: Event -> State -> State
 handleKeys (EventKey (Char 's') _ _ _) _ = initialState
