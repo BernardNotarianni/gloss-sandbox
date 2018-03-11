@@ -36,6 +36,7 @@ executables:
     dependencies:
     - gloss-sandbox
     - gloss
+    - random
 
 tests:
   gloss-sandbox-test:

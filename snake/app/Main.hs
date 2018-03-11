@@ -2,6 +2,7 @@ module Main where
 
 import Graphics.Gloss
 import Graphics.Gloss.Interface.Pure.Game
+import System.Random
 
 
 background :: Color
@@ -25,38 +26,44 @@ data Game = Running | GameOver
 data State = State { snake :: Snake
                    , direction :: Direction
                    , growth :: Int
-                   , food :: Position
+                   , food :: (Position, StdGen)
                    , game :: Game
                    }
 
 
-initialState :: State
-initialState = State { snake = [(0, 0)]
-                     , direction = (1, 0)
-                     , growth = 5
-                     , food = (2, 3)
-                     , game = Running
-                     }
+initialState :: StdGen -> State
+initialState gen = State { snake = [(0, 0)]
+                       , direction = (1, 0)
+                       , growth = 5
+                       , food = generateFood gen
+                       , game = Running
+                       }
 
 window :: Display
 window = InWindow "Gloss" (windowSize, windowSize) (10, 10)
   where windowSize = 20 * squareSize
 
 main :: IO ()
-main = play window background fps initialState render handleKeys update
+main = do
+  g <- newStdGen
+  play window background fps (initialState g) render handleKeys update
 
 update ::  Float -> State -> State
 update _seconds state
   | game state == GameOver = state
   | hitBody new s = state { game = GameOver }
+  | new == foodPosition = state { growth = 3, food = generateFood gen}
   | g > 0 = state { snake = new : s, growth = g - 1 }
   | otherwise = state { snake = new :  (cutTail s) }
   where
     s = snake state
     g = growth state
     d = direction state
+    (foodPosition,_) = food state
     cutTail = reverse . tail . reverse
     new = newHead s d
+    hitBody = elem
+    (_, gen) = food state
 
 newHead :: Snake -> Direction -> Position
 newHead s d = (x', y')
@@ -67,15 +74,14 @@ newHead s d = (x', y')
     x' = x + dx
     y' = y + dy
 
-hitBody :: Position -> Snake -> Bool
-hitBody position s =
-  position `elem` s
 
 render :: State -> Picture
 render state =
   Pictures [ renderSnake $ snake state
-           , renderFood $ food state
+           , renderFood $ foodPosition
            ]
+  where
+    (foodPosition, _) = food state
 
 
 renderSnake :: Snake -> Picture
@@ -97,8 +103,15 @@ renderCell c (cell_x, cell_y) =
     x = fromIntegral $ cell_x * squareSize
     y = fromIntegral $ cell_y * squareSize
 
+generateFood :: StdGen -> (Position, StdGen)
+generateFood gen1 = ((x,y), gen3)
+  where
+    (x, gen2) = randomR (0,10) gen1
+    (y, gen3) = randomR (0,10) gen2
+
 handleKeys :: Event -> State -> State
-handleKeys (EventKey (Char 's') _ _ _) _ = initialState
+handleKeys (EventKey (Char 's') _ _ _) s = initialState $ gen
+  where (_, gen) = food s
 handleKeys (EventKey (SpecialKey KeyLeft)  _ _ _) state = state { direction = (-1, 0) }
 handleKeys (EventKey (SpecialKey KeyRight) _ _ _) state = state { direction = ( 1, 0) }
 handleKeys (EventKey (SpecialKey KeyUp)    _ _ _) state = state { direction = ( 0, 1) }
