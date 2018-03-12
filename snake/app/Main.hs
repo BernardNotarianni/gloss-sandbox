@@ -14,6 +14,9 @@ fps = 3
 squareSize :: Int
 squareSize = 20
 
+boardSize :: Int
+boardSize = 30
+
 
 type Position = (Int, Int)
 type Direction = (Int, Int)
@@ -41,7 +44,7 @@ initialState gen = State { snake = [(0, 0)]
 
 window :: Display
 window = InWindow "Gloss" (windowSize, windowSize) (10, 10)
-  where windowSize = 20 * squareSize
+  where windowSize = boardSize * squareSize
 
 main :: IO ()
 main = do
@@ -99,16 +102,19 @@ renderFood p =
 
 renderCell :: Color -> Position -> Picture
 renderCell c (cell_x, cell_y) =
-  translate x y $ color c $ rectangleSolid 20 20
+  translate x y $ color c $ rectangleSolid pixelSize pixelSize
   where
+    pixelSize = fromIntegral squareSize
     x = fromIntegral $ cell_x * squareSize
     y = fromIntegral $ cell_y * squareSize
 
 generateFood :: StdGen -> (Position, StdGen)
 generateFood gen1 = ((x,y), gen3)
   where
-    (x, gen2) = randomR (-10,10) gen1
-    (y, gen3) = randomR (-10,10) gen2
+    half = boardSize `quot` 2
+    (x, gen2) = randomR (-half,half) gen1
+    (y, gen3) = randomR (-half,half) gen2
+  
 
 handleKeys :: Event -> State -> State
 handleKeys (EventKey (Char 's') _ _ _) s = initialState $ gen
