@@ -51,22 +51,23 @@ main = do
 update ::  Float -> State -> State
 update _seconds state
   | game state == GameOver = state
-  | hitBody new s = state { game = GameOver }
-  | new == foodPosition = state { growth = 3, food = generateFood gen}
-  | g > 0 = state { snake = new : s, growth = g - 1 }
-  | otherwise = state { snake = new :  (cutTail s) }
+  | hitBody = state { game = GameOver }
+  | hitFood = state { growth = 3, food = generateFood gen}
+  | g > 0 = state { snake = newHead : body, growth = g - 1 }
+  | otherwise = state { snake = newHead :  newBody }
   where
-    s = snake state
+    body = snake state
     g = growth state
     d = direction state
-    (foodPosition,_) = food state
-    cutTail = reverse . tail . reverse
-    new = newHead s d
-    hitBody = elem
-    (_, gen) = food state
+    (foodPosition, gen) = food state
 
-newHead :: Snake -> Direction -> Position
-newHead s d = (x', y')
+    newHead = moveHead body d
+    newBody = reverse . tail . reverse $ body
+    hitBody = newHead `elem` newBody
+    hitFood = newHead == foodPosition
+
+moveHead :: Snake -> Direction -> Position
+moveHead s d = (x', y')
   where
     (x, y) = head s
     (dx, dy) = d
@@ -106,8 +107,8 @@ renderCell c (cell_x, cell_y) =
 generateFood :: StdGen -> (Position, StdGen)
 generateFood gen1 = ((x,y), gen3)
   where
-    (x, gen2) = randomR (0,10) gen1
-    (y, gen3) = randomR (0,10) gen2
+    (x, gen2) = randomR (-10,10) gen1
+    (y, gen3) = randomR (-10,10) gen2
 
 handleKeys :: Event -> State -> State
 handleKeys (EventKey (Char 's') _ _ _) s = initialState $ gen
