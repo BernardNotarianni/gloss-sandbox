@@ -48,8 +48,12 @@ window = InWindow "Gloss" (windowSize, windowSize) (10, 10)
 
 main :: IO ()
 main = do
-  g <- newStdGen
-  play window background fps (initialState g) render handleKeys update
+  gen <- newStdGen
+  play
+    window background
+    fps (initialState gen) render
+    handleKeys
+    update
 
 update ::  Float -> State -> State
 update _seconds state
@@ -114,7 +118,7 @@ generateFood gen1 = ((x,y), gen3)
     half = boardSize `quot` 2
     (x, gen2) = randomR (-half,half) gen1
     (y, gen3) = randomR (-half,half) gen2
-  
+
 
 handleKeys :: Event -> State -> State
 handleKeys (EventKey (Char 's') _ _ _) s = initialState $ gen
