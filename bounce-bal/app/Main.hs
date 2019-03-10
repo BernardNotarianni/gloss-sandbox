@@ -3,17 +3,6 @@ module Main where
 import Graphics.Gloss
 import Graphics.Gloss.Interface.Pure.Game
 
-data Direction = ToLeft | ToRight
-
-data State = State { position :: (Float, Float)
-                   , direction :: Direction
-                   }
-
-initialState :: State
-initialState = State { position = (0, 0)
-                     , direction = ToRight
-                     }
-
 window :: Display
 window = InWindow "Gloss" (400, 400) (10, 10)
 
@@ -22,28 +11,42 @@ main = play window background fps initialState render handleKeys update
 
 
 
+type Position = (Float, Float)
+data Direction = ToLeft | ToRight
+
+data State = State { position :: Position
+                   , direction :: Direction
+                   }
+
+initialState :: State
+initialState = State { position = (0, 0)
+                     , direction = ToRight
+                     }
+
+
 update ::  Float -> State -> State
 update seconds game = game { position = (x', y'), direction = newDirection }
   where
-    (x, y) = position game
+    currentPosition  = position game
     currentDirection = direction game
-    (vx, vy) = velocity currentDirection
-    newDirection = bounce currentDirection (x,y)
+    newDirection = bounceIfNeeded currentDirection currentPosition
 
-    x' = x + vx
-    y' = y + vy
+    (x, y) = currentPosition
+    (dx, dy) = step newDirection
 
-bounce :: Direction -> (Float, Float) -> Direction
-bounce ToRight (x,y)
+    x' = x + dx
+    y' = y + dy
+
+bounceIfNeeded :: Direction -> Position -> Direction
+bounceIfNeeded ToRight (x,y)
   | x > 200 = ToLeft
-bounce ToLeft (x,y)
+bounceIfNeeded ToLeft (x,y)
   | x < -200 = ToRight
-bounce direction _ = direction
+bounceIfNeeded direction _ = direction
 
-velocity :: Direction -> (Float, Float)
-velocity ToRight = ( 1, 0)
-velocity ToLeft  = (-1, 0)
-
+step :: Direction -> Position
+step ToRight = ( 1, 0)
+step ToLeft  = (-1, 0)
 
 
 
