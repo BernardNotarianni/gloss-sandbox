@@ -6,8 +6,9 @@ while true; do
     stack build
 
     if [ $? -eq 0 ]; then
+        killall gloss-sandbox-exe
         echo "Executing the game..."
-        stack exec gloss-sandbox-exe
+        stack exec gloss-sandbox-exe &
     fi
 
     echo "Waiting for some source file modification..."
