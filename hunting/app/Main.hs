@@ -2,9 +2,15 @@ module Main where
 
 import Graphics.Gloss
 
--- play with some parameters
--- we learn it is ok to play with code within short feedback loops
--- to discover how it works.
+-- we "name" a piece of code
+-- we learn we can create new words to hide technical complexity
+-- those new words make sense to us and are more easy to think about
+-- instead of the "sentences" composed of the framework words
 
 main = display (InWindow "My window" (300, 500) (200, 200))
-       white (Circle 120)
+       white drawing
+
+drawing = Circle 120
+
+
+
