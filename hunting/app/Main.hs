@@ -3,14 +3,12 @@ module Main where
 import Graphics.Gloss
 
 -- where we learn that:
--- 1) color is beautiful and we can create great pictures
--- 2) we can change the forms
--- 3) we do not use parenthesis. we name everything and it is easier
---    to understand what's going on. It is especially useful and efficient
---    in langage hunting mode (ie no speaking allowed)
+-- we can animate our picture
 
-main = display (InWindow "My window" (300, 500) (200, 200))
-       white redSquare
+main = animate (InWindow "My window" (300, 500) (200, 200))
+       white movedSquare
+
+movedSquare x = translate (x * 10) 10 redSquare
 
 redSquare = Color red mediumSquare
 
