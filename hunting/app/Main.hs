@@ -2,15 +2,12 @@ module Main where
 
 import Graphics.Gloss
 
--- we "name" a piece of code
--- we learn we can create new words to hide technical complexity
--- those new words make sense to us and are more easy to think about
--- instead of the "sentences" composed of the framework words
+-- we create our first function
+-- it accept a parameter and avoid some form of repetition
 
 main = display (InWindow "My window" (300, 500) (200, 200))
-       white skinnyCircle
+       white mediumSquare
 
-skinnyCircle = Circle 120
+mediumSquare = square 50
 
-
-
+square x = rectangleSolid x x
